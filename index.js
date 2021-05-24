@@ -1,42 +1,19 @@
-const express = require('express');
-const { ApolloServer, gql } = require('apollo-server-express');
- 
-const typeDefs = gql`
-  type Query {
-    hello: String
-  }
-  type Mutation {
-      file(name: Upload): String!
-  }
-`;
- 
-const resolvers = {
-  Query: {
-    hello: (parent, args, {req, res}) => {
-        
-        console.log(req.headers)
-        res.cookie('cookieName',23, { maxAge: 900000, httpOnly: true })
-        return 'Hello world!'
-    },
-  },
-};
- 
-const server = new ApolloServer({ 
-  typeDefs, 
-  resolvers, 
-  playground: true , 
-  context: ({req, res})=>({req, res})
-});
+import express from 'express'
+import { ApolloServer} from 'apollo-server-express'
+
+import resolvers from './resolvers/resolver.js'
+import schema from './schema/schema.js'
+
+
+const apolloServer = new ApolloServer({typeDefs:schema, resolvers, playground:true, context: ({req, res})=>({req,res})})
  
 const app = express();
-server.applyMiddleware({ app , path:''});
+apolloServer.applyMiddleware({ app , path:'/graphql'});
 
 app.use('/', (req, res, next)=>{
     res.send('Hello')
 })
-
-
  
 app.listen({ port: 5000 }, () =>
-  console.log('Now browse to http://localhost:5000' + server.graphqlPath)
+  console.log('Now browse to http://localhost:5000' + apolloServer.graphqlPath) 
 );
